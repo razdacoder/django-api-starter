@@ -47,18 +47,27 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'djoser',
+    'social_django',
+    'corsheaders',
     'users',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+
+CORS_ALLOWED_ORIGINS = env('CORS_ALLOWED_ORIGINS'.split(','),
+                           default='http://localhost:3000,http://127.0.0.1:3000,http://localhost:5173,http://127.0.0.1:5173'.split(','))
+CORS_ALLOW_CREDENTIALS = True
+
 
 ROOT_URLCONF = 'api.urls'
 AUTH_USER_MODEL = "users.User"
@@ -88,15 +97,26 @@ WSGI_APPLICATION = 'api.wsgi.application'
 
 DATABASES = {
     'default': dj_database_url.parse(
-    env('DATABASE_URL'),
-    conn_max_age=600,
-    conn_health_checks=True,)
+        env('DATABASE_URL'),
+        conn_max_age=600,
+        conn_health_checks=True,)
 }
+
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',),
+        'users.authentication.UserJWTAuthentication',),
 }
+
+
+AUTH_COOKIE = 'access'
+AUTH_REFRESH_COOKIE = 'refresh'
+AUTH_COOKIE_ACCESS_MAX_AGE = 60 * 5
+AUTH_COOKIE_REFRESH_MAX_AGE = 60 * 60 * 24
+AUTH_COOKIE_SECURE = not DEBUG
+AUTH_COOKIE_HTTP_ONLY = True
+AUTH_COOKIE_PATH = '/'
+AUTH_COOKIE_SAME_SITE = 'None'
 
 
 # Password validation
@@ -118,7 +138,7 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 SIMPLE_JWT = {
-   'AUTH_HEADER_TYPES': ('JWT',),
+    'AUTH_HEADER_TYPES': ('JWT',),
 }
 
 
@@ -146,9 +166,8 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 DJOSER = {
-    'PASSWORD_RESET_CONFIRM_URL': '#/password/reset/confirm/{uid}/{token}',
-    'USERNAME_RESET_CONFIRM_URL': '#/username/reset/confirm/{uid}/{token}',
-    'ACTIVATION_URL': '#/activate/{uid}/{token}',
+    'PASSWORD_RESET_CONFIRM_URL': 'auth/password/reset/confirm/{uid}/{token}',
+    'ACTIVATION_URL': 'auth/activate/{uid}/{token}',
     'SEND_ACTIVATION_EMAIL': True,
     'SEND_CONFIRMATION_EMAIL': True,
     'USER_CREATE_PASSWORD_RETYPE': True,
@@ -162,3 +181,7 @@ EMAIL_HOST = env('EMAIL_HOST')
 EMAIL_HOST_USER = env('EMAIL_HOST_USER')
 EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
 EMAIL_PORT = env('EMAIL_PORT')
+
+
+DOMAIN = env('FRONTEND_DOMAIN')
+SITE_NAME = 'Django Stater'
