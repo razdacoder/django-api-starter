@@ -1,5 +1,6 @@
 from django.conf import settings
 from djoser.social.views import ProviderAuthView
+from djoser.views import UserViewSet
 from rest_framework import status
 from rest_framework.decorators import APIView
 from rest_framework.request import Request
@@ -11,6 +12,15 @@ from rest_framework_simplejwt.views import (
 )
 
 # Create your views here.
+
+
+class AccountUserViewSet(UserViewSet):
+    def destroy(self, request, *args, **kwargs):
+        response = super().destroy(request, *args, **kwargs)
+        if response.status_code == 204:
+            response.delete_cookie(settings.AUTH_COOKIE)
+            response.delete_cookie(settings.AUTH_REFRESH_COOKIE)
+        return response
 
 
 class UserTokenObtainPairView(TokenObtainPairView):
